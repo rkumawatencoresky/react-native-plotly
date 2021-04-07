@@ -8,7 +8,16 @@ Base 64 encode source code
 Postmessage source code into webview
 Webview decodes and evals
 Plotly is now in the webview!
+
 */
+
+const clickEvent = `document.getElementById('chart').on('plotly_click', function(data){
+  let infotext = data.points.map(function (d) {
+    return { name: d.data.name, date: d.x, value: d.y };
+});
+window.ReactNativeWebView.postMessage(JSON.stringify(infotext));
+});`
+
 const messages = {
     CHART_LOADED: 'CHART_LOADED',
 };
@@ -17,9 +26,10 @@ const errorHandlerFn = `
     document.getElementById('error').innerHTML += message + '\\n';
   };
 `;
-const Plotly = (props) => {
+const Plotly = props => {
     const lastPropsRef = useRef(props);
     const chart = useRef(null);
+    
     const loadedRef = useRef(false);
     // As of 2/5/2019 it seems that using a # in the html causes the css
     // parsing to crash on Android
@@ -126,7 +136,7 @@ const Plotly = (props) => {
     };
     const webviewLoaded = () => {
         if (Platform.OS === 'android') {
-            // On iOS this is included in a <script> tag
+            // On iOS this is included in a <script> ta g
             invoke(errorHandlerFn);
         }
         // Load plotly
@@ -134,6 +144,8 @@ const Plotly = (props) => {
         const { data, config, layout } = props;
         initialPlot(data, layout, config);
         loadedRef.current = true;
+
+        invoke(clickEvent);
     };
     const onMessage = (event) => {
         // event type is messed up :(
@@ -143,11 +155,15 @@ const Plotly = (props) => {
                     props.onLoad();
                 break;
             default:
-                if (props.debug)
-                    console.error(`Unknown event ${event.nativeEvent.data}`);
+              if(event.nativeEvent.data) {
+                props.onClick(JSON.parse(event.nativeEvent.data));
+              } else if (props.debug) {
+                console.error(`Unknown event ${event.nativeEvent.data}`);
+              }
                 break;
         }
     };
+
     useLayoutEffect(() => {
         const lastProps = lastPropsRef.current;
         lastPropsRef.current = props;

@@ -13,6 +13,19 @@ declare type UpdateFunctions = {
     relayout: (layout: Layout) => void;
     restyle: (data: Data, index: number) => void;
 };
+
+export interface PlotDatum {
+    curveNumber: number;
+    data: PlotData;
+    customdata: Datum;
+    pointIndex: number;
+    pointNumber: number;
+    x: Datum;
+    xaxis: LayoutAxis;
+    y: Datum;
+    yaxis: LayoutAxis;
+}
+
 export interface PlotlyProps {
     data: Data[];
     layout?: Layout;
@@ -22,6 +35,7 @@ export interface PlotlyProps {
     style?: StyleProp<ViewStyle>;
     onLoad?: () => void;
     enableFullPlotly?: boolean;
+    onClick?: null | ((event: TouchEvent) => void);
 }
 declare const Plotly: React.FC<PlotlyProps>;
 export default Plotly;
